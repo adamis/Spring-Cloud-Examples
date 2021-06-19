@@ -2,6 +2,8 @@ package br.com.adamis.usuarios.resource;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,38 +30,45 @@ import br.com.adamis.usuarios.service.UsuariosService;
 @RequestMapping("/usuarios")
 public class UsuariosResource {
 
-  @Autowired private UsuariosRepository usuariosRepository;
+	private static final Logger LOG = LoggerFactory.getLogger(UsuariosResource.class);
 
-  @Autowired private UsuariosService usuariosService;
+	@Autowired
+	private UsuariosRepository usuariosRepository;
 
-  @PostMapping
-  public ResponseEntity<Usuarios> criar(
-      @RequestBody Usuarios usuarios, HttpServletResponse response) {
-    Usuarios usuariosSalva = usuariosRepository.save(usuarios);
-    return ResponseEntity.status(HttpStatus.CREATED).body(usuariosSalva);
-  }
+	@Autowired
+	private UsuariosService usuariosService;
 
-  @GetMapping("/{codigo}")
-  public ResponseEntity<UsuariosDTO> buscarPeloCodigo(@PathVariable Long codigo) {
-    UsuariosDTO usuarios = usuariosService.findById(codigo);
-    return usuarios != null ? ResponseEntity.ok(usuarios) : ResponseEntity.notFound().build();
-  }
+	@PostMapping
+	public ResponseEntity<Usuarios> criar(@RequestBody Usuarios usuarios, HttpServletResponse response) {
+		Usuarios usuariosSalva = usuariosRepository.save(usuarios);
+		return ResponseEntity.status(HttpStatus.CREATED).body(usuariosSalva);
+	}
 
-  @DeleteMapping("/{codigo}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void remover(@PathVariable Long codigo) {
-    usuariosRepository.deleteById(codigo);
-  }
+	@GetMapping("/{codigo}")
+	public ResponseEntity<UsuariosDTO> buscarPeloCodigo(@PathVariable Long codigo) {
+		LOG.info("Buncando o Usuario: "+codigo);
+		
+		UsuariosDTO usuarios = usuariosService.findById(codigo);
+		
+		LOG.info("Usuario Encontrado: "+usuarios.getUsuario());
+		
+		return usuarios != null ? ResponseEntity.ok(usuarios) : ResponseEntity.notFound().build();
+	}
 
-  @PutMapping("/{codigo}")
-  public ResponseEntity<Usuarios> atualizar(
-      @PathVariable Long codigo, @Validated @RequestBody Usuarios usuarios) {
-    Usuarios usuariosSalva = usuariosService.atualizar(codigo, usuarios);
-    return ResponseEntity.ok(usuariosSalva);
-  }
+	@DeleteMapping("/{codigo}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remover(@PathVariable Long codigo) {
+		usuariosRepository.deleteById(codigo);
+	}
 
-  @GetMapping
-  public Page<Usuarios> pesquisar(UsuariosFilter usuariosFilter, Pageable pageable) {
-    return usuariosRepository.filtrar(usuariosFilter, pageable);
-  }
+	@PutMapping("/{codigo}")
+	public ResponseEntity<Usuarios> atualizar(@PathVariable Long codigo, @Validated @RequestBody Usuarios usuarios) {
+		Usuarios usuariosSalva = usuariosService.atualizar(codigo, usuarios);
+		return ResponseEntity.ok(usuariosSalva);
+	}
+
+	@GetMapping
+	public Page<Usuarios> pesquisar(UsuariosFilter usuariosFilter, Pageable pageable) {
+		return usuariosRepository.filtrar(usuariosFilter, pageable);
+	}
 }
