@@ -20,7 +20,7 @@ Projeto simples CRUD de Pessoas
 
 ## usuariosApi
 
-Projeto simples CRUD de Usuarios
+Projeto simples CRUD de Usuarios que faz busca no "pessoasApi" para trazer o usuario com pessoa
 
 ## zuul-gateway
 
