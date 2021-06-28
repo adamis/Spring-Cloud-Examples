@@ -1,6 +1,6 @@
 package br.com.adamis.auth.service;
 
-import java.util.ArrayList;
+import java.util.ArrayList;import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.adamis.auth.entity.Usuarios;
@@ -23,6 +24,8 @@ public class UsuariosService implements AuthenticationProvider {
 
 	@Autowired private UsuariosRepository usuariosRepository;
 
+	@Autowired private PasswordEncoder passwordEncoder;
+	
 	public Usuarios atualizar(Long codigo, Usuarios usuarios) {
 		Usuarios usuariosSalva = buscarPeloCodigo(codigo);
 
@@ -45,28 +48,35 @@ public class UsuariosService implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         
         Authentication auth = null;
-        
+
         System.err.println("Name: "+name);
         System.err.println("Password: "+password);
+        System.err.println("Password Encode: "+passwordEncoder.encode(password));
         
         Optional<Usuarios> optUsuario = usuariosRepository.findByUsuarioAndSenha(name,password);
-        
-        System.err.println("IsPresent: "+optUsuario.isPresent());
         
         if(optUsuario.isPresent()) {
         	
         	String[] rules = optUsuario.get().getRules().split(",");
         	
-        	List<GrantedAuthority> grantedAuths = new ArrayList<>();
+        	//.authorizedGrantTypes("authorization_code", "refresh_token", "implicit")
+        	
+        	List<GrantedAuthority> grantedAuths = new ArrayList<>();        	      	
+        	grantedAuths.add(new SimpleGrantedAuthority("refresh_token"));
+        	
         	for (String rule : rules) {
         		grantedAuths.add(new SimpleGrantedAuthority(rule.toUpperCase()));	
 			}
-        	auth = new UsernamePasswordAuthenticationToken(name,password,grantedAuths);	
+        	
+        	auth = new UsernamePasswordAuthenticationToken(name,password,grantedAuths);
+        	
         }      
         
 		return auth;
 	}
 
+	
+	
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return authentication.equals(UsernamePasswordAuthenticationToken.class);		
