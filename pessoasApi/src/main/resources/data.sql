@@ -1,0 +1,2 @@
+INSERT INTO pessoas VALUES (1, '2021-07-26 20:49:57', 'Pessoa 1', 'M', '(34)33333333');
+INSERT INTO pessoas VALUES (2, '2021-01-01 20:50:23', 'Pessoa 2', 'F', '(34)99999999');
